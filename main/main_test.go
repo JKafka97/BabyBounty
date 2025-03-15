@@ -1,27 +1,29 @@
 package main
 
 import (
-	"net/http"
+	"os"
 	"testing"
 	"time"
+	"net/http"
 )
 
-// Start the server for testing
-func startServer() {
-	go func() {
-		// Use the StartServer function from main.go
-		StartServer()
-	}()
+// TestMain runs before any test and is responsible for global setup
+func TestMain(m *testing.M) {
+	// Start the server once before any tests
+	go StartServer()
 
-	// Give the server a moment to start.
-	time.Sleep(500 * time.Millisecond) // Wait for server to start
+	// Wait for the server to start up
+	time.Sleep(500 * time.Millisecond)
+
+	// Run the tests
+	code := m.Run()
+
+	// Exit with the result of the tests
+	os.Exit(code)
 }
 
 // Test the homeHandler to make sure it responds with the expected message.
 func TestHomeHandler(t *testing.T) {
-	// Start the server once
-	startServer()
-
 	// Send a request to the server.
 	resp, err := http.Get("http://localhost:8080")
 	if err != nil {
@@ -43,9 +45,6 @@ func TestHomeHandler(t *testing.T) {
 
 // Test that the HTTP server starts automatically
 func TestServerStart(t *testing.T) {
-	// Start the server once
-	startServer()
-
 	// Send a request to the running server.
 	resp, err := http.Get("http://localhost:8080")
 	if err != nil {
