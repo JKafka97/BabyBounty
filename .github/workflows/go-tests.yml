@@ -6,6 +6,9 @@ jobs:
   test:
     name: Run Go Tests & Checks
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
