@@ -1,0 +1,61 @@
+syntax = "proto3";
+
+package gift;
+
+// Define your service and messages
+service GiftService {
+    rpc GetGift (GetGiftRequest) returns (GetGiftResponse);
+    rpc ListGift (ListGiftRequest) returns (ListGiftResponse);
+    rpc AddGift (AddGiftRequest) returns (AddGiftResponse);
+    rpc RemoveGift (RemoveGiftRequest) returns (RemoveGiftResponse);
+    rpc ReserveGift (ReserveGiftRequest) returns (ReserveGiftResponse);
+}
+
+message GetGiftRequest {
+    string id = 1;
+}
+
+message GetGiftResponse {
+    Gift gift = 1;
+}
+
+message ListGiftRequest {}
+
+message ListGiftResponse {
+    repeated Gift gifts = 1;
+}
+
+message AddGiftRequest {
+    Gift gift = 1;
+}
+
+message AddGiftResponse {
+    string message = 1;
+}
+
+message RemoveGiftRequest {
+    string id = 1;
+}
+
+message RemoveGiftResponse {
+    string message = 1;
+}
+
+message ReserveGiftRequest {
+    string id = 1;
+    string reserved_by = 2;
+}
+
+message ReserveGiftResponse {
+    string message = 1;
+}
+
+message Gift {
+    string id = 1;
+    string name = 2;
+    string description = 3;
+    double price = 4;
+    string recipient = 5;
+    bool reserved = 6;
+    string reserved_by = 7;
+}
