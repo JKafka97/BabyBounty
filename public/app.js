@@ -32,9 +32,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     auth.onAuthStateChanged(user => handleAuthStateChange(user, db, elements));
 });
 
-function handleAuthStateChange(user, db, elements) {
+async function handleAuthStateChange(user, db, elements) {
+
     if (user) {
-        elements.giftCreationSection.hidden = user.uid !== "agyVavim1aOJI7eYDim3DQIwi3H3";
+        const useryType = await getMyPermisions(user.uid, db);
+        elements.giftCreationSection.hidden = "admin"!== useryType;
         setupThings(user, db, elements);
     } else {
         cleanupThings(elements.thingsList);
@@ -162,3 +164,15 @@ window.unclaimGift = function (giftId) {
         claimedBy: null
     }).catch(error => console.error("Error unclaiming gift:", error));
 };
+
+async function getMyPermisions(userId, db) {
+    const userRef = db.collection("userType").doc(userId);
+    try {
+        const userDoc = await userRef.get();
+        if (!userDoc.exists) await userRef.set({ userType: "user" });
+        return (await userRef.get()).data().userType || "Unknown User";
+    } catch (error) {
+        console.error("Error fetching user:", error);
+        return "Unknown User";
+    }
+}
