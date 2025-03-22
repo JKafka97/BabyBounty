@@ -86,16 +86,17 @@ function setupThingsWithoutUser(db, thingsList) {
     });
 }
 
-function setupThings(user, db, elements) {
+async function setupThings(user, db, elements) {
     thingsRef = db.collection('gifts');
+    const userType = await getMyPermisions(user.uid, db); // Fetch user type
     elements.addGiftBtn.onclick = () => addGift(user, db, elements);
 
     unsubscribe = thingsRef.orderBy('claimed').onSnapshot(async snapshot => {
-        elements.thingsList.innerHTML = await generateGiftListHTML(snapshot.docs, db, user);
+        elements.thingsList.innerHTML = await generateGiftListHTML(snapshot.docs, db, user, userType);
     });
 }
 
-async function generateGiftListHTML(docs, db, user = null) {
+async function generateGiftListHTML(docs, db, user = null, userType = "user") {
     return (await Promise.all(docs.map(async doc => {
         const data = doc.data();
         const displayName = data.claimedBy ? await fetchUserDisplayName(db, data.claimedBy) : "";
@@ -109,7 +110,9 @@ async function generateGiftListHTML(docs, db, user = null) {
                 : "")
             : `<button class="btn btn-success w-100" onclick="claimGift('${doc.id}', '${user.uid}')">Claim</button>`)
             : "";
-
+            const deleteButton = userType === "admin" 
+            ? `<button class="btn btn-danger w-100" onclick="deleteGift('${doc.id}')">Delete</button>` 
+            : "";
         return `<div class="card shadow-sm p-3 mb-3">
             <div class="row align-items-center">
                 <div class="col-auto">
@@ -120,6 +123,7 @@ async function generateGiftListHTML(docs, db, user = null) {
                     <p class="mb-1">${data.description}</p>
                     ${claimedByText}
                     ${claimButton}
+                    ${deleteButton}
                 </div>
             </div>
         </div>`;
@@ -163,6 +167,13 @@ window.unclaimGift = function (giftId) {
         claimed: false,
         claimedBy: null
     }).catch(error => console.error("Error unclaiming gift:", error));
+};
+
+window.deleteGift = function (giftId) {
+    if (confirm("Are you sure you want to delete this gift?")) {
+        thingsRef.doc(giftId).delete()
+            .catch(error => console.error("Error deleting gift:", error));
+    }
 };
 
 async function getMyPermisions(userId, db) {
