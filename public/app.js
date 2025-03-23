@@ -49,7 +49,7 @@ async function handleAuthStateChange(user, db, elements) {
 function updateUI(user, elements) {
     elements.whenSignedIn.hidden = !user;
     elements.whenSignedOut.hidden = !!user;
-    elements.userDetails.innerHTML = user ? `<h3>Hello ${user.displayName}!</h3>` : '';
+    elements.userDetails.innerHTML = user ? `<h3>Ahoj ${user.displayName}!</h3>` : '';
 }
 
 function cleanupThings(thingsList) {
@@ -60,10 +60,10 @@ function cleanupThings(thingsList) {
 async function fetchUserDisplayName(db, userId) {
     try {
         const userDoc = await db.collection("users").doc(userId).get();
-        return userDoc.exists ? userDoc.data().displayName : "Unknown User";
+        return userDoc.exists ? userDoc.data().displayName : "Neznámý uživatel";
     } catch (error) {
         console.error("Error fetching user:", error);
-        return "Unknown User";
+        return "Neznámý uživatel";
     }
 }
 
@@ -72,10 +72,10 @@ async function fetchUserDisplayNameWithName(db, userId, userName) {
     try {
         const userDoc = await userRef.get();
         if (!userDoc.exists) await userRef.set({ displayName: userName });
-        return (await userRef.get()).data().displayName || "Unknown User";
+        return (await userRef.get()).data().displayName || "Neznámý uživatel";
     } catch (error) {
         console.error("Error fetching user:", error);
-        return "Unknown User";
+        return "Neznámý uživatel";
     }
 }
 
@@ -101,14 +101,14 @@ async function generateGiftListHTML(docs, db, user = null, userType = "user") {
         const data = doc.data();
         const displayName = data.claimedBy ? await fetchUserDisplayName(db, data.claimedBy) : "";
         const claimedByText = data.claimedBy 
-            ? `<p class="text-muted">Claimed by: <strong>${data.claimedBy === user?.uid ? "You" : displayName}</strong></p>` 
+            ? `<p class="text-muted">Zarezervoval si: <strong>${data.claimedBy === user?.uid ? "Ty" : displayName}</strong></p>` 
             : "";
 
         const claimButton = user ? (data.claimed 
             ? (data.claimedBy === user.uid 
-                ? `<button class="btn btn-danger w-100" onclick="unclaimGift('${doc.id}')">Unclaim</button>` 
+                ? `<button class="btn btn-danger w-100" onclick="unclaimGift('${doc.id}')">Odebrat rezervaci</button>` 
                 : "")
-            : `<button class="btn btn-success w-100" onclick="claimGift('${doc.id}', '${user.uid}')">Claim</button>`)
+            : `<button class="btn btn-success w-100" onclick="claimGift('${doc.id}', '${user.uid}')">Rezervovat</button>`)
             : "";
             const deleteButton = userType === "admin" 
             ? `<button class="btn btn-danger w-100" onclick="deleteGift('${doc.id}')">Delete</button>` 
@@ -116,7 +116,7 @@ async function generateGiftListHTML(docs, db, user = null, userType = "user") {
         return `<div class="card shadow-sm p-3 mb-3">
             <div class="row align-items-center">
                 <div class="col-auto">
-                    <img src="${data.picture}" alt="Gift Image" class="rounded" style="width: 100px; height: auto;">
+                    <img id="card-image" src="${data.picture}" alt="Gift Image" class="rounded">
                 </div>
                 <div class="col">
                     <h5 class="mb-1">${data.name}</h5>
@@ -181,9 +181,9 @@ async function getMyPermisions(userId, db) {
     try {
         const userDoc = await userRef.get();
         if (!userDoc.exists) await userRef.set({ userType: "user" });
-        return (await userRef.get()).data().userType || "Unknown User";
+        return (await userRef.get()).data().userType || "Neznámý uživatel";
     } catch (error) {
         console.error("Error fetching user:", error);
-        return "Unknown User";
+        return "Neznámý uživatel";
     }
 }
